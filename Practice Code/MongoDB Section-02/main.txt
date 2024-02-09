@@ -1,0 +1,108 @@
+CRUD: CREATE READ UPDATE DELETE
+
+CREATE: insertOne, insertMany
+READ: findOne, find
+    -- find will give Cursor Obejct in return, which means you have to traverse through all the data: eg. in shell, type "it" get more data.
+    
+    -- find will not return all data but bunch of data and request more by typing "it"  for more.
+
+    -- we can  use toArray() method on find() to get all data in array.
+
+    -- we also have forEach method on find(), which will traverse through data.
+    -- SYNTAX: db.collectionName.find().forEach((data) => {printjson(data)})
+
+    -- pretty() is only available in find() method, in which we can iterate
+UPDATE: update, updateOne, updateMany 
+        -- * update will update whole document with given document or object, whereas updateOne and updateMnay will update the fields provided 
+
+replaceOne: 
+    -- It'll replace matching object with given object, same as update
+DELETE: deleteOne, deleteMany
+
+
+[PROJECTION]
+-- First Params: filter
+-- Second Params: Options, Projection: which fields to include in result; by default _id is always included
+-- 1: for include field
+-- 0: for exclude field
+db.collectionName.find({}, { key: 1 | 0})
+
+
+[EMBEDDED DOCUMENTS] [NESTED DOCUMENTS]
+-- LIMITATION: Can have upto 100 Levels of Nesting
+-- LIMITATION: Overall Document size has to be below 16 mb/document
+-- Arrays Can hold any data
+
+-- Access Nested data 
+-- MUST BE ENCLOSED INSIDE QUOTATION MARK, OTHERWISE FAILS.
+db.collectionName.findOne({"field1.innerField": "value1"})
+
+{
+    firstName: "David",
+    lastName: "Russel",
+    age: 31,
+    history: [
+        {
+            disease: "Diphtheria", treatment: "Antibiotics and antitoxin"
+        }
+    ]
+},
+{
+    firstName: "Max",
+    lastName: "swimmer",
+    age: 35,
+    history: [
+        {
+            disease: "hemophilia", treatment: " replace the missing blood clotting factor so that the blood can clot properly"
+        }
+    ]
+}
+
+
+-- SECTION-2 : CHALLENGE 1 
+db.patients.insertOne({firstName: "David", lastName: "miller", age: 20, history: [ {disease: "cold", treatment: "Few days medicine"}, { disease: "fever", treatment: "rest for 2 days"}]});
+
+db.patients.insertOne({firstName: "Colt", lastName: "Menu", age: 20, history: [ {disease: "cold", treatment: "Few days medicine"}, { disease: "fever", treatment: "rest for 2 days"}]});
+
+ db.patients.insertOne({
+    firstName: "David",
+    lastName: "Russel",
+    age: 31,
+    history: [
+        {
+            disease: "Diphtheria", treatment: "Antibiotics and antitoxin"
+        }
+    ]
+});
+
+
+db.patients.insertOne({firstName: "David", lastName: "miller", age: 20, history: [ {disease: "cold", treatment: "Few days medicine"}, { disease: "fever", treatment: "rest for 2 days"}]});
+
+db.patients.updateOne({firstName: "Max"}, {$set: {lastName: "Schwarzmuller", age: 36, history: [{disease: "Malaria", treatment: "artemether-lumefantrine"}]}})
+
+db.patients.deleteMany({"history.disease": "cold"});
+
+
+
+-- Important data type limits are:
+
+        -- Normal integers (int32) can hold a maximum value of +-2,147,483,647
+
+        -- Long integers (int64) can hold a maximum value of +-9,223,372,036,854,775,807
+
+        -- Text can be as long as you want - the limit is the 16mb restriction for the overall document
+        -- NumberInt creates a int32 value => NumberInt(55)
+
+        -- NumberLong creates a int64 value => NumberLong(7489729384792)
+
+        -- If you just use a number (e.g. insertOne({a: 1}), this will get added as a normal double into the database. The reason for this is that the shell is based on JS which only knows float/ double values and doesn't differ between integers and floats.
+
+        -- NumberDecimal creates a high-precision double value => NumberDecimal("12.99") => This can be helpful for cases where you need (many) exact decimal places for calculations.
+
+
+-- NODEJS CODE TO INSERT LONG NUMBER
+const Long = require('mongodb').Long;
+ 
+db.collection('wealth').insert( {
+    value: Long.fromString("121949898291")
+});

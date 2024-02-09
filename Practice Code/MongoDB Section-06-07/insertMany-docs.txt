@@ -1,0 +1,81 @@
+The Full insertMany() Docs: https://docs.mongodb.com/manual/reference/method/db.collection.insertMany/
+
+
+mongoimport file.json -d dbname -c collectionName --jsonArray --drop
+
+    --jsonArray => to inform that file contains multiple objects / documents
+    --drop => it'll drop collection and re insert data in collection if that collection already exists
+
+
+[FILTERS]:
+$in: returns data that are in given array []
+$nin:  returns data that are not in given array []
+
+find({age: {$in: [18, 29, 45]}})
+find({age: {$nin: [18, 29, 45]}})
+
+
+$or: returns all documents that match the condition of either clauses
+$nor:  returns all documents that fail to match both clauses
+
+find({$or: [
+    // condition-1
+    {age: {$gt: 25}}, 
+    // condition-2
+    {age: {$lt: 30}}
+ ]
+})
+
+[ELEMENT OPERATOR]:
+$exists: Matches documents that have specified field
+$type: selects documents if field is of a specified type
+
+find({age: {$exists: true | false}})
+
+
+$size: selects documents if array field is specified size
+$all: matches array that contains all elements specified in query -> Order of specified values doesnot matter
+
+find({hobbies: {$ize: 3}})
+find({hobbies: {$all: ["sports", "game"]}})
+
+
+
+$elemMatch: match exact element (array | Object)
+
+find({hobbies: {$elemMatch: {title: "Sports", frequencies: {$gt: 30} } }})
+
+
+find() returns cursor Object
+cursor has many functions: 
+    - hasNext() : true | false
+    - next() : next documents
+    - toArray() : convert to array and returns all records or documents
+    - sort({key: 1 | -1}) : sorts records according to specified fields in ascending or descending order
+    - skip(100) : skips specified no. of records
+    - limit(100) : limits no. of records to specified number
+
+        - order doesn't matter in find().skip().limit() or find().limit().sort(). it'll skip first and then limit it. but in aggregate it'll work different
+
+
+
+[PROJECTIONS: TO SELECT ONLY SPECIFIED COLUMNS IN RESULT] OPERATORS
+find(filter, options)
+find({filter}, {name: 1, _id: 0, age: 1})
+
+// * nesting level 
+find({filter}, {name: 1, _id: 0, "rating.average": 1 age: 1})
+
+
+// get genre with drama and give result of first match which is "drama"
+find({genre: "drama"}, {"genre.$": 1})
+
+// get "horror" genre in output not "drama"
+find({genre: "drama"}, {genre: {$elemMatch: {$eq: "Horror}}})
+
+$slice: 
+// gives first two genre in genre array
+find({"rating.average": {$gt: 9}}, {genre: {$slice: 2}, name: 1})
+
+// [skip, no. of element]: skips 1st and returns next two
+find({"rating.average": {$gt: 9}}, {genre: {$slice: [1, 2]}, name: 1})
